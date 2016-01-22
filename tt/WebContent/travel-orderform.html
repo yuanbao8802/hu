@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>诺爱保险网-保单信息填写</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type="text/css">
+
+</style>
+</head>
+<body>
+<!-- 头部 -->
+<% include("common/head.html"){} %> 
+
+
+
+<div class="main screen">
+	<% include("common/sidebar.html"){} %>
+	
+<link href="${basePath}b2m/assets/css/jqvaild.css" rel="stylesheet" >
+<script src="${basePath}b2m/assets/My97DatePicker/WdatePicker.js"></script> 
+<script src="${basePath}b2m/assets/lib/jquery.validate.js" type="text/javascript"></script>
+<script src="${basePath}b2m/assets/js/ins/jquery.validateExtends.js" type="text/javascript"></script>
+<script src="${basePath}b2m/assets/js/date.format.js" type="text/javascript"></script>
+<script src="${basePath}b2m/assets/js/ins/ins.js" type="text/javascript"></script>
+
+	<%  var code=strutil.subStringTo(category.CATEGORY_CODE,3,4);
+		var active_name='_';
+	 if(code=='2'){active_name='旅游险';}
+	 else if(code=='3'){active_name='意外险';}
+	 else if(code=='4'){active_name='健康险';}
+	 %>
+	<div class="control policybox" id="policyform">
+		<!-- 面包屑 -->
+		<p class="curpaturn">
+			<span>当前位置：</span>
+			<a href="${basePath}product/personalProduct">个人险产品</a>
+			<span>&gt;</span>
+			<a href="${basePath}product/personalProduct?fristCateId=${code!}">${active_name!}</a>
+			<span>&gt;</span>
+			<a href="${basePath}product/personalProduct?fristCateId=${code!}&secondCateId=${category.category_id}">${category.name!}</a>
+			<span>&gt;</span>
+			<a class="active">${product.name}</a>
+		</p>
+		<!-- 面包屑 End -->
+		<%
+		 	DIRECTIVE SAFE_OUTPUT_OPEN;
+		  	var isAbroadTravel = strutil.startWith(category.category_code, "00020002");
+		  	var flag = false;
+		   	if (1 == type!) {
+		   		flag = true;
+		   	}
+		%>
+		<ul class="flowbar">
+			<li class="completed"><i>1</i><span>填写保单</span></li>
+			<li><i>2</i><span>预览保单</span></li>
+			<li><i>3</i><span>在线支付</span></li>
+			<li><i>4</i><span>购买完成</span></li>
+		</ul>
+	    <input type="hidden" id="basePath" value="${basePath}" />
+		<input type="hidden" id="ageCode" value="${ageCode.provider_code_name}" minId="${ageCode.min_value}" minWeight="${ageCode.insured_age_min_weight}"  maxId="${ageCode.max_value}" maxWeight="${ageCode.insured_age_max_weight}" />
+		<input type="hidden" id="periodCode" value="${periodCode.provider_code_name}" minId="${periodCode.min_value}" minWeight="${periodCode.insured_age_min_weight}"  maxId="${periodCode.max_value}" maxWeight="${periodCode.insured_age_max_weight}" />
+		<!-- 投保信息主体内容 -->
+		<div class="formborder">
+			<p class="leftbox"><span class="bigtxt">${product.name!} |</span> 填写投保单</p>
+			<form class="policyform" name="insForm" id="insForm" action="${basePath}travel/${flag ? 'update' : 'add'}" method="post">
+				<input type="hidden" name="productRate.product_rate_id" value="${productRate.product_rate_id}" />
+		    	<input type="hidden" name="base.product_rate_id" value="${productRate.product_rate_id}"/>
+		    	<input type="hidden" name="category.category_code" value="${category.category_code}" />
+		    	
+		    	<%if (flag) {%>
+		    		<input type="hidden" name="base.base_insurance_id" value="${base.base_insurance_id}" />
+		    		<input type="hidden" name="applicant.applicant_id" value="${applicant.applicant_id}" />
+		    		<input type="hidden" name="insured.insured_id" value="${insured.insured_id}" />
+		    		<input type="hidden" name="travel.base_insurance_id" value="${travel.base_insurance_id}" />
+		    	<% } %>
+		    	
+				<div class="content">
+					<p class="titletxt important notice">为了保障您的权益，请填写真实有效的信息。您填写的内容仅供投保使用，对于您的信息我们会严格保密。（*为必填项）</p>
+					<p class="titletxt"><span class="bigtxt">选择起保日期 |</span> 起保日期以保险公司出具的保险单正文（或承包确认函），起保日期不早于您的缴费日期</p>
+					<label class="label" for="base.effective_date" ><span class="intru"><em>*</em>起保日期:</span>
+						<input type="text" class="policyinp Wdate" name="base.effective_date" style="width:180px; cursor:pointer" onClick="WdatePicker({startDate:'%y-%M-{%d+1}',dateFmt:'yyyy-MM-dd',minDate:'%y-%M-{%d+1}'})" placeholder="" id="effectiveDate"  value='${base.effective_date!, dateFormat="yyyy-MM-dd"}'/>
+					</label>
+				</div>
+				
+				<div class="content">
+					<p class="titletxt"><span class="bigtxt">投保人信息 |</span> 什么是投保人 （投保人必须年满18周岁）
+						<input class="nabtn" id="selinput1" onclick="alertSelectCust()" value="从原客户中选择填入" />
+						</p>
+					<label class="label" ><span class="intru"><em>*</em>投保人姓名:</span>
+						<input type="text" class="policyinp" id="applicant.t_name" placeholder="" name="applicant.t_name" value="${applicant.t_name}" maxlength="20"/>
+					</label>
+					<% if (isAbroadTravel) {%>
+            		<!-- 国外旅游所用 -->
+					<label class="label" for="applicant.t_english_name"><span class="intru"><em>*</em>拼音/英文名:</span>
+						<input type="text" class="policyinp" id="applicant.t_english_name" placeholder="" name="applicant.t_english_name" value="${applicant.t_english_name}" maxlength="30" /> ${applicantNameMsg}
+					</label>
+					<% } %>
+					<label class="label" for="applicant.t_certificate_type"><span class="intru"><em>*</em>证件类型:</span>
+						<select class="firstselect select" name="applicant.t_certificate_type"  id="applicant.t_certificate_type">
+		                  <option value="" >请选择</option>
+		                  <% for (idType in idTypeList) {%>
+		                  	<option value="${idType.code_no}" ${idType.code_no == applicant.t_certificate_type! ? "selected='selected'" : ""}>${idType.provider_code_name}</option>
+		                  <% } %>
+		                </select>
+		                ${applicantCertificateTypeMsg}
+					</label>
+					<label class="label" for="applicant.t_certificate_no"><span class="intru"><em>*</em>证件号码:</span>
+						<input type="text" class="policyinp typeNo" onclick="javascript:getBirth(this,1);" onkeyup="javascript:getBirth(this,1);" onblur="javascript:getBirth(this,1);"  id="applicant.t_certificate_no" placeholder="" name="applicant.t_certificate_no" value="${applicant.t_certificate_no!}" maxlength="30" autocomplete="off" />${applicantCertificateMsg}
+					</label>
+					<label class="label" for="applicant.t_birthday"><span class="intru"><em>*</em>出生日期:</span>
+						<input type="text" class="policyinp Wdate" onclick="WdatePicker({startDate:'{%y-18}-%M-%d',maxDate:'{%y-18}-%M-%d',dateFmt:'yyyy-MM-dd'})" id="applicant.t_birthday" name="applicant.t_birthday" placeholder="" style="width:180px;cursor:pointer" value='${applicant.t_birthday!, dateFormat="yyyy-MM-dd"}' >${applicantBirthdayMsg}
+					</label>
+					<div class="label" id="applicant_t_sex"><span class="intru"><em>*</em>性别:</span>
+						<% for (gender in genderList) {%>
+							<label style="display:inline-block;padding-left: 20px;">
+		                	<input type="radio" class="gender"  name="applicant.t_sex" tid="${gender.provider_code_name}" ${gender.code_no == applicant.t_sex! ? "checked='checked'" : ""} value="${gender.code_no}">${gender.provider_code_name}
+		                	</label>	
+		               <% } %>
+		               ${applicantSexMsg}
+					</div>
+					<label class="label" for="applicant.t_telephone"><span class="intru"><em>*</em>手机号码:</span>
+						<input type="text" class="policyinp" name="applicant.t_telephone" id="applicant.t_telephone" value="${applicant.t_telephone!}">${applicantTelephoneMsg}
+					</label>
+					<label class="label" for="applicant.t_email"><span class="intru"><em>*</em>电子邮箱:</span>
+						<input type="text" class="policyinp" id="applicant.t_email" name="applicant.t_email" value="${applicant.t_email!}"> ${applicantEmailMsg}
+					</label>
+				</div>
+				
+				<div class="content">
+					<p class="titletxt"><span class="bigtxt">被保人信息 |</span> 什么是被保人
+					</p>
+					<input type="hidden" id="insuredType" value="${base.insured_type}" />
+					<label style="display:inline;padding-left: 238px;" class="label"><span>被保险人:</span></label>
+					<label style="display:inline;padding-left: 40px;" >
+						<input type="radio" name="base.insured_type"  id="self" class="insured"  value="1">本人
+					</label>
+					<label style="display:inline;padding-left: 20px;">
+						<input type="radio" name="base.insured_type"  id="other" class="insured" value="2">其他被保险人
+					</label>
+					${baseInsuredTypeMsg}
+					<div id="insured" style="display:block">
+						<label class="label" for="insured.b_name"><span class="intru"><em>*</em>被保险人姓名:</span>
+							<input type="text" class="policyinp insurer" id="insured.b_name" placeholder="" name="insured.b_name" value='${1 != base.insured_type ? insured.b_name! : ""}' maxlength="20"  /> ${insuredNameMsg}
+						</label>
+						<label class="label" for="insured.b_relationship"><span class="intru"><em>*</em>我是投保人的:</span>
+							<select class="firstselect select insurer" name="insured.b_relationship">
+				                <option value="" ${"0" == insured.b_relationship! ? "selected='selected'" : ""}>请选择</option>
+				                <% for (relationship in relationshipList) {%>
+				                  <option value="${relationship.code_no}" ${1 != base.insured_type ? (relationship.code_no == insured.b_relationship! ? "selected='selected'" : "") : "" }>${relationship.provider_code_name}</option>
+				                <% } %>
+			                </select> 
+			                ${insuredRelationshipMsg}
+						</label>
+						<label class="label" for="insured.b_certificate_type"><span class="intru"><em>*</em>证件类型:</span>
+							<select class="firstselect select insurer" name="insured.b_certificate_type">
+			                  <option value="" >请选择</option>
+			                  <% for (idType in idTypeList) {%>
+			                  	<option value="${idType.code_no}" ${1 != base.insured_type ? (idType.code_no == insured.b_certificate_type! ? "selected='selected'" : "") : ""}>${idType.provider_code_name}</option>
+			                  <% } %>
+			                </select> 
+		               		${insuredCertificateTypeMsg}
+						</label>
+						<label class="label"><span class="intru"><em>*</em>证件号码:</span>
+							<input type="text" class="policyinp typeNo insurer" onclick="javascript:getBirth(this,2);" onkeyup="javascript:getBirth(this,2);" onblur="javascript:getBirth(this,2);" id="insured.b_certificate_no" placeholder="" name="insured.b_certificate_no" value='${1 != base.insured_type ? insured.b_certificate_no! : ""}' maxlength="30" autocomplete="off" />${insuredCertificateNoMsg}
+						</label>
+						<label class="label" for="insured.b_birthday"><span class="intru"><em>*</em>出生日期:</span>
+							<%
+								var insBirth = null;
+								if (1 != base.insured_type) {
+									insBirth = insured.b_birthday;
+								}
+							%>
+							<input type="text" class="policyinp Wdate insurerBir" onClick="WdatePicker({minDate:'${insuredMinAge}',maxDate:'${insuredMaxAge}',startDate:'${insuredMinAge}',dateFmt:'yyyy-MM-dd'})"  style="width:180px;cursor:pointer;" name="insured.b_birthday" id="insured.b_birthday" style="cursor:pointer" placeholder="" value='${insBirth, dateFormat="yyyy-MM-dd"}' >
+							${insuredBirthdayMsg}
+						</label>
+						<div class="label"><span class="intru"><em>*</em>性别:</span>
+						<% for (gender in genderList) {%>
+							<label style="display:inline-block;padding-left: 20px;">
+				                <input type="radio" class="insurer gender"  name="insured.b_sex" tid="${gender.provider_code_name}" ${(1 != base.insured_type && gender.code_no == insured.b_sex) ? "checked='checked'" : ""} value="${gender.code_no}">${gender.provider_code_name}
+							</label>
+		                <% } %>
+						</div>
+						<label class="label" for="insured.b_telephone"><span class="intru"><em>*</em>手机号码:</span>
+							<input type="text" class="policyinp insurer" id="insured.b_telephone" placeholder="" name="insured.b_telephone" value='${1 != base.insured_type ? (insured.b_telephone) : ""}'  /> ${insuredTelephoneMsg}
+						</label>
+					</div>
+					
+					<label class="label"><span class="intru"><em>*</em>购买份数:</span>
+						${base.qua}份
+						<input type="hidden" id="" placeholder="" name="base.qua" value="${base.qua}">
+					</label>
+				</div>
+				
+				<% if (isAbroadTravel) {%>
+				<div class="content">
+					<p class="titletxt"><span class="bigtxt">其他信息 |</span></p>
+					<label class="label" for="travel.destination"><span class="intru"><em>*</em>出行目的地:</span>
+						<input type="text" class="policyinp" id="travel.destination" placeholder="" name="travel.destination" value="${travel.destination}"> ${travelDestinationMsg}
+					</label>
+					<label class="label" for="travel.trip_purpose"><span class="intru"><em>*</em>出行目的:</span>
+						<select class="firstselect select" name="travel.trip_purpose">
+		                  <option value="" ${"0" == travel.trip_purpose ? "selected='selected'" : ""}>请选择</option>
+		                  <% for (tripPurpose in tripPurposeList) {%>
+		                  	<option value="${tripPurpose.code_no}" ${tripPurpose.code_no == travel.trip_purpose ? "selected='selected'" : ""}>${tripPurpose.provider_code_name}</option>
+		                  <% } %>
+		                </select> 
+		                ${travelTripPurposeMsg}
+					</label>
+				</div>
+				<%}%> 
+				 
+				<div class="content">
+					<p class="titletxt"><span class="bigtxt">紧急联系人 |</span> （非必填项）</p>
+					<label class="label"><span class="intru"><em>*</em>紧急情况联系人:</span>
+						<input type="text" class="policyinp" name="base.emergency_contact" value="${base.emergency_contact!}" maxlength="20"/>
+					</label>
+					<label class="label"><span class="intru"><em>*</em>手机号码:</span>
+						<input type="text" class="policyinp" name="base.emergency_phone_no" value="${base.emergency_phone_no!}"/>
+					</label>
+				</div>
+				
+				<div class="content">
+					<p class="titletxt"><span class="bigtxt">受益人信息 |</span> 什么是受益人</p>
+					<label class="label"><span class="intru"><em>*</em>受益人:</span>
+						<input type="radio" name="base.legal_heir" checked="checked" value="${beneficial.code_no}" />法定继承人
+					</label>
+					<p class="small">《继承法》规定的法定继承人范围是：第一顺序继承人为配偶、子女、父母；第二顺序继承人为兄弟姐妹、祖父母、外祖父母 </p>
+				</div>
+				
+				<div class="rule">
+					<p class="title">选择起保日投保声明确认</p>
+					<p>1. 投保时，本投保人已就该产品的保障内容以及保险金额向被保险人进行了明确说明，并征得其同意。</p>
+					<p>2. 本投保人兹声明上述各项内容填写属实，并知道如果投保信息不真实，保险公司将有权拒赔，一切后果由本人承担。</p>
+					<p>3. 本投保人已阅读该产品详细条款，并特别就条款中有关责任免除和投保人、被保险人义务的内容进行阅读。本投保人特此同意接受条款全部内容</p>
+					<p>4. 根据《中华人民共和国合同法》第十一条规定，数据电文是合法的合同表现形式。本人接受保险公司在诺爱保险网提供的电子保单作为本投保书成立生效的合法有效凭证，具有完全证据效力。</p>
+				</div>
+				<div>
+					<p class="next">
+						<label><input type="checkbox" class="checkbox" id="accept" name="accept" value="1"  />${acceptMsg}
+							本人接受以上投保说明
+						</label>
+						<input type="button" class="nabtn nextstep" value="下一步" onclick="javascript:submitOrderForm();" />
+					</p>
+				</div>
+			</form>
+		</div>
+		<!-- 投保信息主体内容 End -->
+	</div>
+</div>
+<p class="clear"></p>
+
+
+<script type="text/javascript">
+
+$(function() {
+	var new_date=new Date();
+	var effectiveDate_auto=new_date.getTime()+3600*24*1000;
+	
+// 	var min = ("-" + $("#ageCode").attr("minId") + $("#ageCode").attr("minWeight")).toLowerCase();
+// 	var max = ("-" + $("#ageCode").attr("maxId") + $("#ageCode").attr("maxWeight")).toLowerCase();
+	//保障最大期限数值
+// 	var maxPeriod = $("#periodCode").attr("maxid");
+// 	var maxPeriodUnit = $("#periodCode").attr("maxweight");
+	
+	
+	//起保日期
+	$("#effectiveDate").on("keyup",function(){
+// 		$(this).val(new Date(effectiveDate_auto).Format2("yyyy-MM-dd"));
+	});
+	
+	
+	$("#effectiveDate").on("click", function() {
+		//如果日期为空，自动设为明天。
+		if ("" == $(this).val()) {
+// 			$(this).val(new Date(effectiveDate_auto).Format2("yyyy-MM-dd"));
+		}
+	});
+	
+	//如果手动的输入，默认将其设为18岁。
+// 	$(".applicantBirthday").on("keyup", function() {
+// 		$(this).datepicker("update", "-18y");
+// 	});
+	
+		
+// 	$(".insurerBir").datepicker({
+// 		language: 'zh-CN',
+// 		format:'yyyy-mm-dd',
+// 			startView:2,
+// 			autoclose:true,
+// 			endDate:min,
+// 			startDate:max
+// 	});
+	
+	//如果手动的输入，默认将其设为最小年龄。
+// 	$(".insurerBir").on("keyup", function() {
+// 		$(this).datepicker("update", min);
+// 	});
+	
+	
+	
+	
+	$(".insured").on("click", function() {
+		var value = $(this).val();
+		if ("1" == value) {
+			$("#insured").css("display", "none");
+			$(".insurer").attr("disabled", "disabled");
+			var maxAge = $("#ageCode").attr("maxId");
+			var maxWeight = $("#ageCode").attr("maxWeight");
+			if ((maxAge < 18 && "Y" == maxWeight) || "M" == maxWeight || "D" == maxWeight) {
+				alert("该产品投保适龄对象为" + $("#ageCode").val() + "" );
+			}
+		} else if ("2" == value){
+			$("#insured").css("display", "block");
+			$(".insurer").removeAttr("disabled");
+		}
+	});
+	
+	//选择本人，其他被保人的标记
+	var insuredType = $("#insuredType").val();
+	if ("" != insuredType) {
+		if ("1" == insuredType) {
+			$("#insured").css("display", "none");
+			$("#self").prop("checked", true);
+		} else {
+			$("#other").prop("checked", true);
+		}
+	} else {
+		$("#other").prop("checked", true);
+	}
+	
+	var mySelfCode = "";
+	$("form [name='insured.b_relationship'] option").each(function() {
+		if ("本人" == $(this).text()) {
+			mySelfCode = $(this).val();
+			$(this).remove();
+		}
+	});
+	
+	$(".typeNo").on("autocomplete", function() {
+		alert("hello");
+	});
+	
+	$("#insForm").validate({
+		onfocusout: function(element) {
+			var id = $(element).attr("id");
+			if ("effectiveDate" != id) {
+				$(element).valid();
+			}
+		},
+		rules:{
+			"base.effective_date": {
+				required:true,
+				isEffectiveDate:true,
+				remote: {
+                    url: $("#basePath").val() + "product/isValTime",
+                    type: 'POST',
+                    dateType: 'json'
+                }
+			},
+			"applicant.t_name": {
+				required:true,
+				minlength:2,
+				isName:true,
+				maxlength:20
+			}, 
+			"applicant.t_english_name": {
+				required:true,
+				isEnglishName:true,
+				minlength:2,
+				maxlength:60
+			},
+			"applicant.t_certificate_type":"required",
+			"applicant.t_certificate_no":{
+				required:true,
+				isIDCard:true,
+				maxlength:30,
+				isIDCarMatchSexAndBirth:true
+			},
+			"applicant.t_birthday":{
+				required:true,
+				is18year:true
+			},
+			"applicant.t_sex":"required",
+			"applicant.t_telephone":{
+				required:true,
+				isCellPhone:true
+			},
+			"applicant.t_email": {
+		      required: true,
+		      email: true
+		    },
+		    "base.insured_type":"required",
+		    "insured.b_name":{
+				required:true,
+				minlength:2,
+				isName:true,
+				maxlength:20
+			},
+		    "insured.b_relationship":"required",
+		    "insured.b_certificate_type":"required",
+		    "insured.b_certificate_no": {
+		    	required:true,
+		    	isIDCard:true,
+		    	maxlength:30,
+		    	isIDCarMatchSexAndBirth:true
+		    },
+		    "insured.b_birthday":"required",
+		    "insured.b_sex":"required",
+		    "insured.b_telephone":{
+		    	required:true,
+		    	isCellPhone:true
+		    }, 
+		    "travel.destination":"required",
+		    "travel.trip_purpose":"required",
+		    "base.emergency_contact":{
+		    	required:false,
+		    	minlength:2,
+		    	maxlength:20
+		    },
+		    "base.emergency_phone_no":{
+		    	required:false,
+		    	isCellPhone:true
+		    }
+		},
+		messages: {
+			"base.effective_date": {
+				required:"请选择起保日期", 
+				remote: $.validator.format("距离生效日期太短，无法及时投保")
+			},
+			"applicant.t_name": {
+				required:"请填写投保人姓名",
+				minlength:"姓名只能为汉字或英文字母，且至少两个字",
+				maxlength:"姓名不能超过20个字"
+			},
+			"applicant.t_english_name": {
+				required:"请填写拼音或英文名",
+				minlength:"只能为英文字母，且至少两个字母",
+				maxlength:"拼音或英文名不能超过60个字母"
+			},
+			"applicant.t_certificate_type":"请选择证件类型",
+			"applicant.t_certificate_no": {
+				required:"请填写证件号码", 
+				maxlength:"证件号码不能超过30个位"
+			},
+			"applicant.t_birthday":{
+				required:"请选择出生日期"
+			},
+			"applicant.t_sex":"请选择性别",
+			"applicant.t_telephone": {
+				required:"请填写手机号码"
+			},
+			"applicant.t_email":"请填写邮箱地址",
+			"base.insured_type":"请选择被保险人",
+			"insured.b_name":{
+				required:"请填写投保人姓名",
+				minlength:"姓名只能为汉字或英文字母，且至少两个字",
+				maxlength:"姓名不能超过20个字"
+			},
+			"insured.b_relationship":"请选择我是投保人的？",
+			"insured.b_certificate_type":"请选择证件类型",
+			"insured.b_certificate_no": {
+				required:"请填写证件号码",
+				maxlength:"证件号码不能超过30个位"
+			},
+			"insured.b_birthday":"请选择出生日期",
+			"insured.b_sex":"请选择性别",
+			"insured.b_telephone":"请填写手机号码",
+			"travel.destination":"请填写出行目的地",
+			"travel.trip_purpose":"请选择出行目的",
+			"base.emergency_contact":{
+				minlength:"姓名只能为汉字或英文字母，且至少两个字",
+				maxlength:"姓名不能超过20个字"
+			},
+			"base.emergency_phone_no":{
+				required:"请填写紧急联系人手机号码"
+			}
+		},
+		//在上例中新增的部分 
+		errorPlacement: function(error, element) { //指定错误信息位置 
+			if (element.is(':radio') || element.is(':checkbox')) { //如果是radio或checkbox 
+				error.appendTo(element.closest("div")); //将错误信息添加当前元素的父结点后面 
+			} else { 
+				error.insertAfter(element); 
+			} 
+		},
+		errorElement:"span",
+		errorClass:"jqerror"
+	});
+	
+	//从原客户中选择填入
+	$("#selinput1").on("click",function(){
+		$("#cselectwinid").show();
+	});
+	$(".close").on("click",function(){
+		$("#cselectwinid").hide();
+	});
+});
+
+
+</script>
+<link rel="stylesheet" href="${basePath}b2m/assets/css/zebra_dialog.css" type="text/css" />
+<style type="text/css">
+.ZebraDialog .ZebraDialog_Icon{
+	padding:10px 2px 0px;
+	min-height:0px;
+}
+.ZebraDialog .ZebraDialog_Information{
+	background-image:none;
+}
+</style>
+<script src="${basePath}b2m/assets/lib/zebra_dialog.js"></script> 
+<script>
+function alertSelectCust(){
+	$.Zebra_Dialog('', {
+	    'source':  {'ajax': '${basePath}customer/selectCust'},
+	    width: 1000,
+	    'height': 300,
+	    'title': '请选择投保人',
+	    'buttons':  [
+             {caption: '确认',callback:function(){
+	             	var selected = $("input[type='radio']:checked");
+	             	var tr_ = selected.parent("td").parent("tr");
+	             	var attr = tr_.find("td");
+	             	var customerId = $(attr[0]).find("input:last-child").val();
+	             	$.ajax({
+						url:'${basePath}customer/getCustByIdForJson',
+						type:'POST',
+						data:"customerId="+customerId,
+						success:function(data){
+							$(document.getElementById("applicant.t_name")).val(data.CUSTOMER_NAME);
+							$(document.getElementById("applicant.t_english_name")).val(data.CUSTOMER_ENAME);
+							$(document.getElementById("applicant.t_certificate_type")).val(data.CERTIFICATE_TYPE);
+							$(document.getElementById("applicant.t_certificate_no")).val(data.CERTIFICATE_NO);
+							var brithday=data.BIRTHDAY.substr(0,10);
+							$(document.getElementById("applicant.t_birthday")).val(brithday);
+							$("#applicant_t_sex input[value='"+data.SEX+"']").prop("checked",true);
+							$(document.getElementById("applicant.t_telephone")).val(data.MOBILE);
+							$(document.getElementById("applicant.t_email")).val(data.EMAIL);
+							
+						}
+					});
+             	
+             	
+             }},
+             {caption: '取消'},
+         ]
+	})
+}
+
+$(function(){
+	
+	//投保人客户选择
+// 	$("#selinput1").on("click",function(){
+		
+		
+// 	});
+	
+
+});
+function submitOrderForm() {
+	// 验证是否处理登录状态
+	$.ajax({
+		url :　"${basePath}user/validLoginStatus",
+		dataType : "json",
+		type : "post",
+		success : function(data) {
+			if (data.success) {
+				submitForm();// 提交表单
+			} else {
+				$.Zebra_Dialog("", {
+					'custom_class' : 'quickForm',
+					'source':  {'ajax': '${basePath}user/quickLogin'},
+					'buttons' : false,
+					'show_close_button' : false
+				});
+			}
+		}
+	});	
+}
+</script>
+<% include("common/footer.html"){} %>  
+</body>
+</html>
